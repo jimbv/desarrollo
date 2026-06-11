@@ -1,0 +1,1 @@
+{"version":3,"file":"jsonplaceholder-users.gateway.js","sourceRoot":"","sources":["../../../src/users/gateways/jsonplaceholder-users.gateway.ts"],"names":[],"mappings":";;;AAAA,iCAA0B;AAI1B,MAAa,2BAA2B;IACtC,KAAK,CAAC,QAAQ;QACZ,MAAM,EAAE,IAAI,EAAE,GAAG,MAAM,eAAK,CAAC,GAAG,CAC9B,4CAA4C,CAC7C,CAAC;QACF,OAAO,IAAI,CAAC;IACd,CAAC;CACF;AAPD,kEAOC"}
