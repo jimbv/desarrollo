@@ -1,11 +1,15 @@
 import { CreateProductInput, Product, UpdateProductInput } from '../product.types';
-import { ProductsRepository } from '../repositories/products.repository';
+import type { PaginateResults } from '../../shared/paginated-result.type';
+import type { ProductsRepository } from '../repositories/products.repository';
 export declare class ProductsService {
     private readonly productsRepository;
     constructor(productsRepository: ProductsRepository);
-    findAll(): Product[];
-    findOne(id: number): Product;
-    create(input: CreateProductInput): Product;
-    update(id: number, input: UpdateProductInput): Product;
-    remove(id: number): Product;
+    findAll(page?: number, limit?: number): Promise<PaginateResults<Product>>;
+    findByName(name: string): Promise<Product[]>;
+    findOne(id: number): Promise<Product>;
+    create(input: CreateProductInput): Promise<Product>;
+    update(id: number, input: UpdateProductInput): Promise<Product>;
+    reduceStock(id: number, stock: number): Promise<Product | undefined>;
+    remove(id: number): Promise<Product | undefined>;
+    orderBy(input: 'name' | 'price', order?: 'asc' | 'desc'): Promise<Product[]>;
 }

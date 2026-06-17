@@ -20,29 +20,50 @@ let ProductsService = class ProductsService {
     constructor(productsRepository) {
         this.productsRepository = productsRepository;
     }
-    findAll() {
-        return this.productsRepository.findAll();
+    async findAll(page = 1, limit = 10) {
+        if (page < 1)
+            page = 1;
+        if (limit < 1)
+            limit = 10;
+        if (limit > 50)
+            limit = 50;
+        return await this.productsRepository.findAll(page, limit);
     }
-    findOne(id) {
-        const product = this.productsRepository.findById(id);
+    async findByName(name) {
+        return await this.productsRepository.findByName(name);
+    }
+    async findOne(id) {
+        const product = await this.productsRepository.findById(id);
+        if (!product) {
+            throw new common_1.NotFoundException('Product not found');
+        }
+        return product;
+    }
+    async create(input) {
+        return await this.productsRepository.create(input);
+    }
+    async update(id, input) {
+        const product = await this.productsRepository.update(id, input);
         if (!product)
             throw new common_1.NotFoundException('Product not found');
         return product;
     }
-    create(input) {
-        return this.productsRepository.create(input);
+    async reduceStock(id, stock) {
+        const product = await this.productsRepository.findById(id);
+        if (!product)
+            throw new common_1.NotFoundException('Product not found');
+        if (product.stock < stock)
+            throw new common_1.BadRequestException('Not enough stock');
+        return await this.productsRepository.reduceStock(id, stock);
     }
-    update(id, input) {
-        const product = this.productsRepository.update(id, input);
+    async remove(id) {
+        const product = await this.productsRepository.remove(id);
         if (!product)
             throw new common_1.NotFoundException('Product not found');
         return product;
     }
-    remove(id) {
-        const product = this.productsRepository.remove(id);
-        if (!product)
-            throw new common_1.NotFoundException('Product not found');
-        return product;
+    async orderBy(input, order) {
+        return await this.productsRepository.OrderBy(input, order);
     }
 };
 exports.ProductsService = ProductsService;

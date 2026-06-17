@@ -28,6 +28,17 @@ let UsersService = class UsersService {
             throw new common_1.BadGatewayException('Upstream users service failed');
         }
     }
+    async findById(id) {
+        try {
+            return await this.usersGateway.fetchById(id);
+        }
+        catch (error) {
+            if (error.response?.status === 404) {
+                throw new common_1.NotFoundException('User not found');
+            }
+            throw new common_1.BadGatewayException('Upstream users service failed');
+        }
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

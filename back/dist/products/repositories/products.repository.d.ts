@@ -1,9 +1,13 @@
 import { CreateProductInput, Product, UpdateProductInput } from '../product.types';
 export declare const PRODUCTS_REPOSITORY = "PRODUCTS_REPOSITORY";
+import type { PaginateResults } from '../../shared/paginated-result.type';
 export interface ProductsRepository {
-    findAll(): Product[];
-    findById(id: number): Product | undefined;
-    create(input: CreateProductInput): Product;
-    update(id: number, input: UpdateProductInput): Product | undefined;
-    remove(id: number): Product | undefined;
+    findAll(page: number, limit: number): Promise<PaginateResults<Product>>;
+    findByName(name: string): Promise<Product[]>;
+    findById(id: number): Promise<Product | undefined>;
+    create(input: CreateProductInput): Promise<Product>;
+    update(id: number, input: UpdateProductInput): Promise<Product | undefined>;
+    reduceStock(id: number, stock: number): Promise<Product | undefined>;
+    remove(id: number): Promise<Product | undefined>;
+    OrderBy(input: 'name' | 'price', order?: 'asc' | 'desc'): Promise<Product[]>;
 }

@@ -8,20 +8,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductsModule = void 0;
 const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
+const product_entity_1 = require("./entities/product.entity");
 const products_controller_1 = require("./controllers/products.controller");
-const in_memory_products_repository_1 = require("./repositories/in-memory-products.repository");
 const products_repository_1 = require("./repositories/products.repository");
 const products_service_1 = require("./services/products.service");
+const typeorm_products_repository_1 = require("./repositories/typeorm-products.repository");
 let ProductsModule = class ProductsModule {
 };
 exports.ProductsModule = ProductsModule;
 exports.ProductsModule = ProductsModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([product_entity_1.ProductEntity])],
         controllers: [products_controller_1.ProductsController],
         providers: [
             products_service_1.ProductsService,
-            { provide: products_repository_1.PRODUCTS_REPOSITORY, useClass: in_memory_products_repository_1.InMemoryProductsRepository },
+            { provide: products_repository_1.PRODUCTS_REPOSITORY, useClass: typeorm_products_repository_1.TypeOrmProductsRepository },
         ],
         exports: [products_service_1.ProductsService, products_repository_1.PRODUCTS_REPOSITORY],
     })

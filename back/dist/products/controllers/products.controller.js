@@ -20,42 +20,60 @@ let ProductsController = class ProductsController {
     constructor(productsService) {
         this.productsService = productsService;
     }
-    findAll() {
-        return this.productsService.findAll();
+    findAll(page, limit) {
+        return this.productsService.findAll(Number(page), Number(limit));
     }
-    findOne(id) {
-        return this.productsService.findOne(Number(id));
+    async findByName(name) {
+        return await this.productsService.findByName(name);
     }
-    create(body) {
-        return this.productsService.create(body);
+    async findOne(id) {
+        return await this.productsService.findOne(Number(id));
     }
-    update(id, body) {
-        return this.productsService.update(Number(id), body);
+    async create(body) {
+        return await this.productsService.create(body);
     }
-    remove(id) {
-        return this.productsService.remove(Number(id));
+    async update(id, body) {
+        return await this.productsService.update(Number(id), body);
+    }
+    async reduceStock(id, stock) {
+        return await this.productsService.reduceStock(Number(id), stock);
+    }
+    async remove(id) {
+        return await this.productsService.remove(Number(id));
+    }
+    async orderBy(input, order) {
+        return await this.productsService.orderBy(input, order);
     }
 };
 exports.ProductsController = ProductsController;
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Array)
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
 ], ProductsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('search/:name'),
+    __param(0, (0, common_1.Param)('name')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "findByName", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
@@ -63,15 +81,31 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)(':id/stock'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('stock')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "reduceStock", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)('orderBy/:input/'),
+    __param(0, (0, common_1.Param)('input')),
+    __param(1, (0, common_1.Query)('order')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "orderBy", null);
 exports.ProductsController = ProductsController = __decorate([
     (0, common_1.Controller)('products'),
     __metadata("design:paramtypes", [products_service_1.ProductsService])
