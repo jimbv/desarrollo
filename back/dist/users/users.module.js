@@ -10,6 +10,7 @@ exports.UsersModule = void 0;
 const common_1 = require("@nestjs/common");
 const users_controller_1 = require("./controllers/users.controller");
 const jsonplaceholder_users_gateway_1 = require("./gateways/jsonplaceholder-users.gateway");
+const local_users_gateway_1 = require("./gateways/local-users.gateway");
 const users_gateway_1 = require("./gateways/users.gateway");
 const users_service_1 = require("./services/users.service");
 let UsersModule = class UsersModule {
@@ -21,7 +22,14 @@ exports.UsersModule = UsersModule = __decorate([
         controllers: [users_controller_1.UsersController],
         providers: [
             users_service_1.UsersService,
-            { provide: users_gateway_1.USERS_GATEWAY, useClass: jsonplaceholder_users_gateway_1.JsonPlaceholderUsersGateway },
+            {
+                provide: users_gateway_1.USERS_GATEWAY,
+                useFactory: () => {
+                    return process.env.USERS_SOURCE === 'local'
+                        ? new local_users_gateway_1.LocalUsersGateway()
+                        : new jsonplaceholder_users_gateway_1.JsonPlaceholderUsersGateway();
+                },
+            },
         ],
         exports: [users_service_1.UsersService, users_gateway_1.USERS_GATEWAY],
     })

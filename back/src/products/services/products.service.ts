@@ -4,15 +4,13 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import {
-  CreateProductInput,
-  Product,
-  UpdateProductInput,
-} from '../product.types';
+import { Product } from '../product.types';
 
 import type { PaginateResults } from '../../shared/paginated-result.type';
 import { PRODUCTS_REPOSITORY } from '../repositories/products.repository';
 import type { ProductsRepository } from '../repositories/products.repository';
+import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -45,11 +43,11 @@ export class ProductsService {
     return product;
   }
 
-  async create(input: CreateProductInput): Promise<Product> {
+  async create(input: CreateProductDto): Promise<Product> {
     return await this.productsRepository.create(input);
   }
 
-  async update(id: number, input: UpdateProductInput): Promise<Product> {
+  async update(id: number, input: UpdateProductDto): Promise<Product> {
     const product = await this.productsRepository.update(id, input);
     if (!product) throw new NotFoundException('Product not found');
     return product;

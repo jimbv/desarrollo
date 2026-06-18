@@ -4,12 +4,10 @@ import { Repository } from 'typeorm';
 
 import { ProductEntity } from '../entities/product.entity';
 import type { ProductsRepository } from '../repositories/products.repository';
-import {
-  CreateProductInput,
-  Product,
-  UpdateProductInput,
-} from '../product.types';
+import { Product } from '../product.types';
 import { PaginateResults } from 'src/shared/paginated-result.type';
+import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 @Injectable()
 export class TypeOrmProductsRepository implements ProductsRepository {
@@ -43,13 +41,13 @@ export class TypeOrmProductsRepository implements ProductsRepository {
   async findByName(name: string): Promise<Product[]> {
     return this.repository.findBy({ name });
   }
-  async create(input: CreateProductInput): Promise<Product> {
+  async create(input: CreateProductDto): Promise<Product> {
     const product = this.repository.create(input);
     return this.repository.save(product);
   }
   async update(
     id: number,
-    input: UpdateProductInput,
+    input: UpdateProductDto,
   ): Promise<Product | undefined> {
     const product = await this.repository.findOneBy({ id });
 

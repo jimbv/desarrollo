@@ -4,6 +4,7 @@ import { UsersGateway } from './users.gateway';
 
 export class JsonPlaceholderUsersGateway implements UsersGateway {
   async fetchAll(): Promise<ExternalUser[]> {
+    console.log('JSONPLACEHOLDER GATEWAY');
     const { data } = await axios.get<ExternalUser[]>(
       'https://jsonplaceholder.typicode.com/users',
     );

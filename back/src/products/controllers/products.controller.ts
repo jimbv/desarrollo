@@ -10,11 +10,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProductsService } from '../services/products.service';
-import type {
-  CreateProductInput,
-  Product,
-  UpdateProductInput,
-} from '../product.types';
+import type { Product } from '../product.types';
+import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -38,16 +36,16 @@ export class ProductsController {
   }
 
   @Post()
-  async create(@Body() body: CreateProductInput): Promise<Product> {
-    return await this.productsService.create(body);
+  async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
+    return await this.productsService.create(createProductDto);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() body: UpdateProductInput,
+    @Body() updateProductDto: UpdateProductDto,
   ): Promise<Product> {
-    return await this.productsService.update(Number(id), body);
+    return await this.productsService.update(Number(id), updateProductDto);
   }
 
   @Patch(':id/stock')

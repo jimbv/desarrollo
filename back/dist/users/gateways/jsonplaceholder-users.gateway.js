@@ -7,6 +7,7 @@ exports.JsonPlaceholderUsersGateway = void 0;
 const axios_1 = __importDefault(require("axios"));
 class JsonPlaceholderUsersGateway {
     async fetchAll() {
+        console.log('JSONPLACEHOLDER GATEWAY');
         const { data } = await axios_1.default.get('https://jsonplaceholder.typicode.com/users');
         return data;
     }

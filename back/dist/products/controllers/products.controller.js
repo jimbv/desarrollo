@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductsController = void 0;
 const common_1 = require("@nestjs/common");
 const products_service_1 = require("../services/products.service");
+const create_product_dto_1 = require("../dto/create-product.dto");
+const update_product_dto_1 = require("../dto/update-product.dto");
 let ProductsController = class ProductsController {
     productsService;
     constructor(productsService) {
@@ -29,11 +31,11 @@ let ProductsController = class ProductsController {
     async findOne(id) {
         return await this.productsService.findOne(Number(id));
     }
-    async create(body) {
-        return await this.productsService.create(body);
+    async create(createProductDto) {
+        return await this.productsService.create(createProductDto);
     }
-    async update(id, body) {
-        return await this.productsService.update(Number(id), body);
+    async update(id, updateProductDto) {
+        return await this.productsService.update(Number(id), updateProductDto);
     }
     async reduceStock(id, stock) {
         return await this.productsService.reduceStock(Number(id), stock);
@@ -72,7 +74,7 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [create_product_dto_1.CreateProductDto]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "create", null);
 __decorate([
@@ -80,7 +82,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, update_product_dto_1.UpdateProductDto]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "update", null);
 __decorate([
