@@ -1,0 +1,17 @@
+.verify-pending-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  text-align: center;
+}
+
+.verify-pending-container h2 {
+  margin: 0 0 8px 0;
+}
+
+.verify-pending-container p {
+  margin: 0;
+  color: #444;
+}

@@ -16,6 +16,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/register/register').then((m) => m.RegisterPage),
   },
   {
+    path: 'verify-pending',
+    loadComponent: () => import('./pages/verify-pending/verify-pending').then((m) => m.VerifyPendingPage),
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () => import('./pages/verify-email/verify-email').then((m) => m.VerifyEmailPage),
+  },
+  {
     path: 'profile',
     loadComponent: () => import('./pages/profile/profile').then((m) => m.ProfilePage),
     canActivate: [authGuard],
