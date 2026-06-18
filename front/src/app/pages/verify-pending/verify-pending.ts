@@ -6,3 +6,4 @@ import { Component } from '@angular/core';
   styleUrl: './verify-pending.css',
 })
 export class VerifyPendingPage {}
+
