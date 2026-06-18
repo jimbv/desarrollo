@@ -9,5 +9,11 @@ export class JsonPlaceholderUsersGateway implements UsersGateway {
     );
     return data;
   }
-}
 
+  async fetchById(id: number): Promise<ExternalUser> {
+    const { data } = await axios.get<ExternalUser>(
+      `https://jsonplaceholder.typicode.com/users/${id}`,
+    );
+    return data;
+  }
+}

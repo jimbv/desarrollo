@@ -4,4 +4,3 @@ export type ExternalUser = {
   username: string;
   email: string;
 };
-

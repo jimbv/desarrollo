@@ -10,4 +10,9 @@ export class UsersController {
   findAll(): Promise<ExternalUser[]> {
     return this.usersService.findAll();
   }
+
+  @Get(':id')
+  findById(id: number): Promise<ExternalUser> {
+    return this.usersService.findById(id);
+  }
 }

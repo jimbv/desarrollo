@@ -1,13 +1,18 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import {
   CreateProductInput,
   Product,
   UpdateProductInput,
 } from '../product.types';
-import {
-  PRODUCTS_REPOSITORY,
-  ProductsRepository,
-} from '../repositories/products.repository';
+
+import type { PaginateResults } from '../../shared/paginated-result.type';
+import { PRODUCTS_REPOSITORY } from '../repositories/products.repository';
+import type { ProductsRepository } from '../repositories/products.repository';
 
 @Injectable()
 export class ProductsService {
@@ -16,30 +21,58 @@ export class ProductsService {
     private readonly productsRepository: ProductsRepository,
   ) {}
 
-  findAll(): Product[] {
-    return this.productsRepository.findAll();
+  async findAll(page = 1, limit = 10): Promise<PaginateResults<Product>> {
+    if (page < 1) page = 1;
+
+    if (limit < 1) limit = 10;
+
+    if (limit > 50) limit = 50;
+
+    return await this.productsRepository.findAll(page, limit);
   }
 
-  findOne(id: number): Product {
-    const product = this.productsRepository.findById(id);
+  async findByName(name: string): Promise<Product[]> {
+    return await this.productsRepository.findByName(name);
+  }
+
+  async findOne(id: number): Promise<Product> {
+    const product = await this.productsRepository.findById(id);
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    return product;
+  }
+
+  async create(input: CreateProductInput): Promise<Product> {
+    return await this.productsRepository.create(input);
+  }
+
+  async update(id: number, input: UpdateProductInput): Promise<Product> {
+    const product = await this.productsRepository.update(id, input);
     if (!product) throw new NotFoundException('Product not found');
     return product;
   }
 
-  create(input: CreateProductInput): Product {
-    return this.productsRepository.create(input);
+  async reduceStock(id: number, stock: number): Promise<Product | undefined> {
+    const product = await this.productsRepository.findById(id);
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.stock < stock)
+      throw new BadRequestException('Not enough stock');
+    return await this.productsRepository.reduceStock(id, stock);
   }
 
-  update(id: number, input: UpdateProductInput): Product {
-    const product = this.productsRepository.update(id, input);
+  async remove(id: number): Promise<Product | undefined> {
+    const product = await this.productsRepository.remove(id);
     if (!product) throw new NotFoundException('Product not found');
     return product;
   }
 
-  remove(id: number): Product {
-    const product = this.productsRepository.remove(id);
-    if (!product) throw new NotFoundException('Product not found');
-    return product;
+  async orderBy(
+    input: 'name' | 'price',
+    order?: 'asc' | 'desc',
+  ): Promise<Product[]> {
+    return await this.productsRepository.OrderBy(input, order);
   }
 }
-

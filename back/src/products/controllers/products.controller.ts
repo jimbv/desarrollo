@@ -6,9 +6,11 @@ import {
   Param,
   Post,
   Put,
+  Patch,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from '../services/products.service';
-import {
+import type {
   CreateProductInput,
   Product,
   UpdateProductInput,
@@ -19,28 +21,53 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(): Product[] {
-    return this.productsService.findAll();
+  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    return this.productsService.findAll(Number(page), Number(limit));
+  }
+
+  @Get('search/:name')
+  async findByName(
+    @Param('name') name: string,
+  ): Promise<Product[] | undefined> {
+    return await this.productsService.findByName(name);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Product {
-    return this.productsService.findOne(Number(id));
+  async findOne(@Param('id') id: string): Promise<Product> {
+    return await this.productsService.findOne(Number(id));
   }
 
   @Post()
-  create(@Body() body: CreateProductInput): Product {
-    return this.productsService.create(body);
+  async create(@Body() body: CreateProductInput): Promise<Product> {
+    return await this.productsService.create(body);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() body: UpdateProductInput): Product {
-    return this.productsService.update(Number(id), body);
+  async update(
+    @Param('id') id: string,
+    @Body() body: UpdateProductInput,
+  ): Promise<Product> {
+    return await this.productsService.update(Number(id), body);
+  }
+
+  @Patch(':id/stock')
+  async reduceStock(
+    @Param('id') id: string,
+    @Body('stock') stock: number,
+  ): Promise<Product | undefined> {
+    return await this.productsService.reduceStock(Number(id), stock);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Product {
-    return this.productsService.remove(Number(id));
+  async remove(@Param('id') id: string): Promise<Product | undefined> {
+    return await this.productsService.remove(Number(id));
+  }
+
+  @Get('orderBy/:input/')
+  async orderBy(
+    @Param('input') input: 'name' | 'price',
+    @Query('order') order?: 'asc' | 'desc',
+  ): Promise<Product[]> {
+    return await this.productsService.orderBy(input, order);
   }
 }
-
