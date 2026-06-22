@@ -1,4 +1,0 @@
-export type PaginateResults<T> = {
-  data: T[];
-  meta: { page: number; limit: number; total: number; totalPages: number };
-};

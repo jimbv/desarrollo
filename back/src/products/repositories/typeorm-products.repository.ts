@@ -1,86 +1,107 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-
-import { ProductEntity } from '../entities/product.entity';
-import type { ProductsRepository } from '../repositories/products.repository';
+import { Like, Repository } from 'typeorm';
 import {
   CreateProductInput,
   Product,
   UpdateProductInput,
 } from '../product.types';
-import { PaginateResults } from 'src/shared/paginated-result.type';
+import { PaginatedResult } from '../../common/types/paginated-result.type';
+import { ProductsRepository } from './products.repository';
+import { ProductEntity } from '../product.entity';
 
 @Injectable()
 export class TypeOrmProductsRepository implements ProductsRepository {
   constructor(
     @InjectRepository(ProductEntity)
-    private readonly repository: Repository<ProductEntity>,
+    private readonly repo: Repository<ProductEntity>,
   ) {}
+
   async findAll(
-    page: number,
-    limit: number,
-  ): Promise<PaginateResults<Product>> {
-    const [data, total] = await this.repository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
+    name?: string,
+    orderBy?: 'price' | 'name',
+    order: 'asc' | 'desc' = 'asc',
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedResult<Product>> {
+    const safePage = page < 1 ? 1 : page;
+    const safeLimit = limit > 50 ? 50 : limit;
+    const skip = (safePage - 1) * safeLimit;
+
+    const [data, total] = await this.repo.findAndCount({
+      where: name ? { name: Like(`%${name}%`) } : {},
+      order: orderBy
+        ? {
+            [orderBy]: order.toUpperCase() as 'ASC' | 'DESC',
+          }
+        : {},
+      skip,
+      take: safeLimit,
     });
+
     return {
       data,
       meta: {
-        page,
-        limit,
+        page: safePage,
+        limit: safeLimit,
         total,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / safeLimit),
       },
     };
   }
 
   async findById(id: number): Promise<Product | undefined> {
-    const product = await this.repository.findOneBy({ id });
+    const product = await this.repo.findOne({ where: { id } });
     return product ?? undefined;
   }
-  async findByName(name: string): Promise<Product[]> {
-    return this.repository.findBy({ name });
+
+  async findByCategoryId(categoryId: number): Promise<Product[]> {
+    return this.repo.find({
+      where: { categoryId },
+    });
   }
+
   async create(input: CreateProductInput): Promise<Product> {
-    const product = this.repository.create(input);
-    return this.repository.save(product);
+    const product = this.repo.create(input);
+    return this.repo.save(product);
   }
+
   async update(
     id: number,
     input: UpdateProductInput,
   ): Promise<Product | undefined> {
-    const product = await this.repository.findOneBy({ id });
+    const product = await this.findById(id);
 
     if (!product) {
       return undefined;
     }
 
-    Object.assign(product, input);
+    const updatedProduct = this.repo.merge(product, input);
+    return this.repo.save(updatedProduct);
+  }
 
-    return await this.repository.save(product);
-  }
-  async reduceStock(id: number, stock: number): Promise<Product | undefined> {
+  async updateStock(
+    id: number,
+    quantity: number,
+  ): Promise<Product | undefined> {
     const product = await this.findById(id);
-    if (!product) return undefined;
-    product.stock -= stock;
-    return this.repository.save(product);
+
+    if (!product) {
+      return undefined;
+    }
+
+    product.stock -= quantity;
+    return this.repo.save(product);
   }
+
   async remove(id: number): Promise<Product | undefined> {
     const product = await this.findById(id);
-    if (!product) return undefined;
-    await this.repository.remove(product);
+
+    if (!product) {
+      return undefined;
+    }
+
+    await this.repo.remove(product);
     return product;
-  }
-  async OrderBy(
-    input: 'name' | 'price',
-    order: 'asc' | 'desc' = 'asc',
-  ): Promise<Product[]> {
-    return this.repository.find({
-      order: {
-        [input]: order.toUpperCase() as 'ASC' | 'DESC',
-      },
-    });
   }
 }

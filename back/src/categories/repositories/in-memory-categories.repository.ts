@@ -1,33 +1,36 @@
+import { Category, CreateCategoryInput } from '../category.types';
 import { CategoriesRepository } from './categories.repository';
-import { Category, CreateCategoryInput } from '../categories.types';
 
 export class InMemoryCategoriesRepository implements CategoriesRepository {
-  private categories: Category[] = [
-    { id: 1, name: 'Bebidas' },
-    { id: 2, name: 'Snacks' },
-    { id: 3, name: 'Dulces' },
-  ];
-  private nextId = this.categories.length + 1;
+  private categories: Category[] = [];
+  private nextId = 1;
 
   findAll(): Category[] {
     return this.categories;
   }
 
   findById(id: number): Category | undefined {
-    return this.categories.find((c) => c.id === id);
+    return this.categories.find((category) => category.id === id);
   }
 
   create(input: CreateCategoryInput): Category {
-    const newCategory: Category = {
+    const category: Category = {
       id: this.nextId++,
       name: input.name,
     };
-    this.categories.push(newCategory);
-    return newCategory;
+
+    this.categories.push(category);
+    return category;
   }
 
-  remove(id: number): Category {
+  remove(id: number): Category | undefined {
+    const category = this.findById(id);
+
+    if (!category) {
+      return undefined;
+    }
+
     this.categories = this.categories.filter((c) => c.id !== id);
-    return this.categories.find((c) => c.id === id)!;
+    return category;
   }
 }

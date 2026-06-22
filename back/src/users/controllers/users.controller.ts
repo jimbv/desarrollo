@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ExternalUser } from '../user.types';
 import { UsersService } from '../services/users.service';
 
@@ -12,7 +12,17 @@ export class UsersController {
   }
 
   @Get(':id')
-  findById(id: number): Promise<ExternalUser> {
-    return this.usersService.findById(id);
+  findOne(@Param('id') id: string): Promise<ExternalUser> {
+    return this.usersService.findOne(Number(id));
+  }
+
+  @Post()
+  create(@Body() body: any) {
+    console.log('Datos recibidos:', body);
+
+    return{
+      mensaje: "Usuario creado exitosamente",
+      data: body,
+    };
   }
 }

@@ -1,27 +1,28 @@
-import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Category, CreateCategoryInput } from '../category.types';
 import { CategoriesService } from '../services/categories.service';
-import type { Category, CreateCategoryInput } from '../categories.types';
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private categoriesService: CategoriesService) {}
+  constructor(private readonly categoriesService: CategoriesService) {}
+
   @Get()
   findAll(): Category[] {
     return this.categoriesService.findAll();
   }
 
   @Get(':id')
-  findById(@Param('id') id: number): Category | undefined {
-    return this.categoriesService.findById(Number(id));
+  findOne(@Param('id') id: string): Category {
+    return this.categoriesService.findOne(Number(id));
   }
 
   @Post()
-  create(@Body() input: CreateCategoryInput): Category {
-    return this.categoriesService.create(input);
+  create(@Body() body: CreateCategoryInput): Category {
+    return this.categoriesService.create(body);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number): Category {
-    return this.categoriesService.remove(Number(id));
-  }
+    remove(@Param('id') id: string): Promise<Category> {
+        return this.categoriesService.remove(Number(id));
+    }
 }

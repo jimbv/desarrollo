@@ -1,151 +1,96 @@
-import {
-  CreateProductInput,
-  Product,
-  UpdateProductInput,
-} from '../product.types';
-import { ProductsRepository } from './products.repository';
-import type { PaginateResults } from '../../shared/paginated-result.type';
-export class InMemoryProductsRepository implements ProductsRepository {
-  private products: Product[] = [
-    {
-      id: 1,
-      name: 'Cafe',
-      price: 250,
-      stock: 200,
-    },
-    {
-      id: 2,
-      name: 'Leche',
-      price: 150,
-      stock: 50,
-    },
-    {
-      id: 3,
-      name: 'Azucar',
-      price: 120,
-      stock: 30,
-    },
-    {
-      id: 4,
-      name: 'Cafe Premium',
-      price: 450,
-      stock: 20,
-    },
-    {
-      id: 5,
-      name: 'Galletitas',
-      price: 300,
-      stock: 50,
-    },
-    {
-      id: 6,
-      name: 'Cafe con Leche',
-      price: 350,
-      stock: 100,
-    },
-  ];
+import { CreateProductInput, Product, UpdateProductInput, } from '../product.types';
+import { PaginatedResult } from 'src/common/types/paginated-result.type';
+
+export class InMemoryProductsRepository {
+  private products: Product[] = [];
   private nextId = 1;
 
-  async findAll(
-    page: number,
-    limit: number,
-  ): Promise<PaginateResults<Product>> {
-    const start = (page - 1) * limit;
+  findAll(name?: string,
+    orderBy?: 'price' | 'name',
+    order?: 'asc' | 'desc',
+    page = 1,
+    limit = 10,): PaginatedResult<Product> {
+    let result = [...this.products];
 
-    const data = this.products.slice(start, start + limit);
+    if (name) {
+      result = result.filter((product) =>
+        product.name.toLowerCase().includes(name.toLowerCase()),
+      );
+    }
 
-    const total = this.products.length;
+    if (orderBy) {
+      result.sort((a, b) => {
+        if (orderBy === 'price') {
+          return order === 'desc'? b.price - a.price: a.price - b.price;
+        }
 
-    const totalPages = Math.ceil(total / limit);
+        return order === 'desc'? b.name.localeCompare(a.name): a.name.localeCompare(b.name);
+      });
+    }
 
-    return await Promise.resolve({
+    const safePage = page < 1 ? 1 : page;
+    const safeLimit = limit > 50 ? 50 : limit;
+    const total = result.length;
+    const totalPages = Math.ceil(total / safeLimit);
+    const start = (safePage - 1) * safeLimit;
+    const data = result.slice(start, start + safeLimit);
+
+    return {
       data,
       meta: {
-        page,
-        limit,
+        page: safePage,
+        limit: safeLimit,
         total,
         totalPages,
       },
-    });
+    }
   }
 
-  async findByName(name: string): Promise<Product[]> {
-    return await Promise.resolve(
-      this.products.filter((p) =>
-        p.name.toLowerCase().includes(name.toLowerCase()),
-      ),
-    );
+  findById(id: number): Product | undefined {
+    return this.products.find((p) => p.id === id);
+  }
+  
+  findByCategoryId(categoryId: number): Product[] {
+    return this.products.filter((product) => product.categoryId === categoryId);
   }
 
-  async findById(id: number): Promise<Product | undefined> {
-    return await Promise.resolve(this.products.find((p) => p.id === id));
-  }
-
-  async create(input: CreateProductInput): Promise<Product> {
+  create(input: CreateProductInput): Product {
     const product: Product = {
       id: this.nextId++,
       name: input.name,
       price: input.price,
       stock: input.stock,
+      categoryId: input.categoryId,
     };
 
     this.products.push(product);
-    return await Promise.resolve(product);
+    return product;
   }
 
-  async update(
-    id: number,
-    input: UpdateProductInput,
-  ): Promise<Product | undefined> {
-    const product = await this.findById(id);
+  update(id: number, input: UpdateProductInput): Product | undefined {
+    const product = this.findById(id);
     if (!product) return undefined;
 
     if (input.name !== undefined) product.name = input.name;
     if (input.price !== undefined) product.price = input.price;
     if (input.stock !== undefined) product.stock = input.stock;
-    return await Promise.resolve(product);
+    if (input.categoryId !== undefined) product.categoryId = input.categoryId;
+    return product;
   }
 
-  async reduceStock(id: number, stock: number): Promise<Product> {
-    const product = await this.findById(id);
-    if (!product) throw new Error('Product not found');
+  updateStock(id: number, quantity: number): Product | undefined {
+    const product = this.findById(id);
+    if (!product) return undefined;
 
-    product.stock -= stock;
-    return await Promise.resolve(product);
+    product.stock -= quantity;
+    return product;
   }
 
-  async remove(id: number): Promise<Product | undefined> {
-    const product = await this.findById(id);
+  remove(id: number): Product | undefined {
+    const product = this.findById(id);
     if (!product) return undefined;
 
     this.products = this.products.filter((p) => p.id !== id);
-    return await Promise.resolve(product);
-  }
-
-  async OrderBy(
-    input: 'name' | 'price',
-    order?: 'asc' | 'desc',
-  ): Promise<Product[]> {
-    const sortedProducts = [...this.products].sort((a, b) => {
-      if (input === 'name') {
-        if (order === 'desc') {
-          return b.name.localeCompare(a.name);
-        }
-
-        return a.name.localeCompare(b.name);
-      }
-
-      if (input === 'price') {
-        if (order === 'desc') {
-          return b.price - a.price;
-        }
-
-        return a.price - b.price;
-      }
-
-      return 0;
-    });
-
-    return await Promise.resolve(sortedProducts);
+    return product;
   }
 }

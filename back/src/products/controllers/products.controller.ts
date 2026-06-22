@@ -4,70 +4,66 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
-  Patch,
   Query,
 } from '@nestjs/common';
 import { ProductsService } from '../services/products.service';
-import type {
-  CreateProductInput,
-  Product,
-  UpdateProductInput,
-} from '../product.types';
+import { Product } from '../product.types';
+import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
+import { PaginatedResult } from '../../common/types/paginated-result.type';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
-    return this.productsService.findAll(Number(page), Number(limit));
-  }
-
-  @Get('search/:name')
-  async findByName(
-    @Param('name') name: string,
-  ): Promise<Product[] | undefined> {
-    return await this.productsService.findByName(name);
+  findAll(
+    @Query('name') name?: string,
+    @Query('orderBy') orderBy?: 'price' | 'name',
+    @Query('order') order?: 'asc' | 'desc',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PaginatedResult<Product>> {
+    return this.productsService.findAll(
+      name,
+      orderBy,
+      order,
+      page ? Number(page) : undefined,
+      limit ? Number(limit) : undefined,
+    );
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Product> {
-    return await this.productsService.findOne(Number(id));
+  findOne(@Param('id') id: string): Promise<Product> {
+    return this.productsService.findOne(Number(id));
   }
 
   @Post()
-  async create(@Body() body: CreateProductInput): Promise<Product> {
-    return await this.productsService.create(body);
+  create(@Body() body: CreateProductDto): Promise<Product> {
+    return this.productsService.create(body);
   }
 
   @Put(':id')
-  async update(
+  update(
     @Param('id') id: string,
-    @Body() body: UpdateProductInput,
+    @Body() body: UpdateProductDto,
   ): Promise<Product> {
-    return await this.productsService.update(Number(id), body);
+    return this.productsService.update(Number(id), body);
   }
 
   @Patch(':id/stock')
-  async reduceStock(
+  reduceStock(
     @Param('id') id: string,
-    @Body('stock') stock: number,
-  ): Promise<Product | undefined> {
-    return await this.productsService.reduceStock(Number(id), stock);
+    @Body() body: { quantity: number },
+  ): Promise<Product> {
+    return this.productsService.reduceStock(Number(id), body.quantity);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Product | undefined> {
-    return await this.productsService.remove(Number(id));
-  }
-
-  @Get('orderBy/:input/')
-  async orderBy(
-    @Param('input') input: 'name' | 'price',
-    @Query('order') order?: 'asc' | 'desc',
-  ): Promise<Product[]> {
-    return await this.productsService.orderBy(input, order);
+  remove(@Param('id') id: string): Promise<Product> {
+    return this.productsService.remove(Number(id));
   }
 }

@@ -16,4 +16,6 @@ export class JsonPlaceholderUsersGateway implements UsersGateway {
     );
     return data;
   }
+  
 }
+
