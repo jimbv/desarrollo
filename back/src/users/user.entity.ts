@@ -15,6 +15,12 @@ export class UserEntity {
   @Column({ type: 'text', default: UserRole.USER })
   role!: UserRole;
 
+  @Column({ type: 'boolean', default: false })
+  isVerified!: boolean;
+
+  @Column({ type: 'varchar', nullable: true, default: null })
+  verificationToken!: string | null;
+
   @CreateDateColumn()
   createdAt!: Date;
 }
