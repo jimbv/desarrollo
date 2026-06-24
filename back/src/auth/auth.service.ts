@@ -7,15 +7,22 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../users/user.entity';
 import { UserRole } from '../users/user-role.enum';
+import { randomUUID } from 'crypto'; // Para generar el token único
+import { Resend } from 'resend'; // SDK oficial de Resend
 
 @Injectable()
 export class AuthService {
+  private readonly resend: Resend;
+
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepo: Repository<UserEntity>,
     private readonly cfg: ConfigService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+    const apiKey = this.cfg.get<string>('RESEND_API_KEY') ?? 're_mock_123';
+    this.resend = new Resend(apiKey);
+  }
 
   async register(email: string, password: string) {
     const rounds = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
@@ -24,10 +31,15 @@ export class AuthService {
     const countUsers = await this.usersRepo.count();
     const role = countUsers === 0 ? UserRole.ADMIN : UserRole.USER;
 
+    // 1. Generamos el token único de verificación
+    const verificationToken = randomUUID();
+
     const entity = this.usersRepo.create({
       email: email.trim().toLowerCase(),
       passwordHash,
       role,
+      verificationToken,
+      isVerified: false, // Inicialmente no verificado
     });
 
     let savedUser: UserEntity;
@@ -38,21 +50,41 @@ export class AuthService {
       throw new ConflictException('El email ya está registrado');
     }
 
-    const accessToken = this.jwtService.sign({
-      sub: savedUser.id,
-      email: savedUser.email,
-      role: savedUser.role,
+
+    // 2. Construimos el link de verificación para el correo
+    const frontendUrl = this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+    const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+    // 3. Enviamos el mail con Resend de forma asíncrona (sin bloquear la respuesta)
+    const fromEmail = this.cfg.get<string>('MAIL_FROM') ?? 'onboarding@resend.dev';
+    
+    this.resend.emails.send({
+      from: fromEmail,
+      to: savedUser.email,
+      subject: 'Verifica tu cuenta',
+      html: `
+        <h1>¡Bienvenido!</h1>
+        <p>Gracias por registrarte. Por favor, verifica tu cuenta haciendo clic en el siguiente enlace:</p>
+        <p><a href="${verificationLink}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Verificar mi correo</a></p>
+        <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+        <p>${verificationLink}</p>
+      `,
+    }).catch(err => {
+      // Manejo de error silencioso para que la app no se caiga si falla el envío de mail en dev
+      console.error('Error enviando email con Resend:', err);
     });
 
+    // 4. Devolvemos la response limpia (Sin token de acceso, cumpliendo la consigna)
     return {
+      message: 'Usuario registrado exitosamente. Por favor, verifica tu correo electrónico.',
       user: {
         id: savedUser.id,
         email: savedUser.email,
         role: savedUser.role,
         createdAt: savedUser.createdAt,
       },
-      access_token: accessToken,
     };
+    
   }
 
   async login(email: string, password: string) {
