@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { Category, CreateCategoryInput } from '../category.types';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Category, CreateCategoryInput, UpdateCategoryInput } from '../category.types';
 import { CategoriesService } from '../services/categories.service';
 
 @Controller('categories')
@@ -19,6 +19,14 @@ export class CategoriesController {
   @Post()
   create(@Body() body: CreateCategoryInput): Category {
     return this.categoriesService.create(body);
+  }
+
+  @Put(':id')
+  update(
+    @Param('id') id: string,
+    @Body() body: UpdateCategoryInput,
+  ): Promise<Category> {
+    return this.categoriesService.update(Number(id), body);
   }
 
   @Delete(':id')

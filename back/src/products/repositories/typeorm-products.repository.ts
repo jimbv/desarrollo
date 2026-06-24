@@ -40,13 +40,10 @@ export class TypeOrmProductsRepository implements ProductsRepository {
     });
 
     return {
-      data,
-      meta: {
-        page: safePage,
-        limit: safeLimit,
-        total,
-        totalPages: Math.ceil(total / safeLimit),
-      },
+      items: data,
+      total,
+      page: safePage,
+      limit: safeLimit,
     };
   }
 

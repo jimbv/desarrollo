@@ -23,13 +23,14 @@ export class ProductsController {
   findAll(
     @Query('name') name?: string,
     @Query('orderBy') orderBy?: 'price' | 'name',
+    @Query('sortBy') sortBy?: 'price' | 'name',
     @Query('order') order?: 'asc' | 'desc',
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ): Promise<PaginatedResult<Product>> {
     return this.productsService.findAll(
       name,
-      orderBy,
+      sortBy ?? orderBy,
       order,
       page ? Number(page) : undefined,
       limit ? Number(limit) : undefined,

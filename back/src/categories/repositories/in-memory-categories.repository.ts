@@ -1,4 +1,4 @@
-import { Category, CreateCategoryInput } from '../category.types';
+import { Category, CreateCategoryInput, UpdateCategoryInput } from '../category.types';
 import { CategoriesRepository } from './categories.repository';
 
 export class InMemoryCategoriesRepository implements CategoriesRepository {
@@ -31,6 +31,20 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
     }
 
     this.categories = this.categories.filter((c) => c.id !== id);
+    return category;
+  }
+
+  update(id: number, input: UpdateCategoryInput): Category | undefined {
+    const category = this.findById(id);
+
+    if (!category) {
+      return undefined;
+    }
+
+    if (input.name !== undefined) {
+      category.name = input.name;
+    }
+
     return category;
   }
 }

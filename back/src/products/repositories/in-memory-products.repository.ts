@@ -36,13 +36,10 @@ export class InMemoryProductsRepository {
     const data = result.slice(start, start + safeLimit);
 
     return {
-      data,
-      meta: {
-        page: safePage,
-        limit: safeLimit,
-        total,
-        totalPages,
-      },
+      items: data,
+      total,
+      page: safePage,
+      limit: safeLimit,
     }
   }
 
