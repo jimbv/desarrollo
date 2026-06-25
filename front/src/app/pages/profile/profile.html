@@ -14,6 +14,20 @@
                 <th class="ps-0" style="width: 120px">ID</th>
                 <td><code>{{ user.id }}</code></td>
               </tr>
+               <tr>
+                <th class="ps-0" style="width: 120px">Verificado</th>
+                <td>
+                  @if (user.isVerified) {
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle me-1"></i>Sí
+                    </span>
+                  } @else {
+                    <span class="badge bg-danger">
+                      <i class="bi bi-x-circle me-1"></i>No
+                    </span>
+                  }
+                </td>
+              </tr>
               <tr>
                 <th class="ps-0">Email</th>
                 <td><i class="bi bi-envelope me-1 text-muted"></i>{{ user.email }}</td>
