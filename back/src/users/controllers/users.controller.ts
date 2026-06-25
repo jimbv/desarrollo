@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ExternalUser } from '../user.types';
 import { UsersService } from '../services/users.service';
 import { UserRole } from '../user-role.enum';
 
@@ -8,13 +7,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll(): Promise<ExternalUser[]> {
+  findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<ExternalUser> {
-    return this.usersService.findOne(Number(id));
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
   }
 
   @Post()

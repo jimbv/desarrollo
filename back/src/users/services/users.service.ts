@@ -22,28 +22,38 @@ export class UsersService {
     private readonly usersRepo: Repository<UserEntity>,
   ) {}
 
-  async findAll(): Promise<ExternalUser[]> {
-    try {
-      return await this.usersGateway.fetchAll();
-    } catch {
-      throw new BadGatewayException('Upstream users service failed');
-    }
+  async findAll() {
+    const users = await this.usersRepo.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return users.map((user) => ({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+    }));
   }
 
-  async findOne(id: number): Promise<ExternalUser> {
-    try {
-      return await this.usersGateway.fetchById(id);
-    } catch (error: any) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
+  async findOne(id: string) {
+    const user = await this.usersRepo.findOne({
+      where: { id },
+    });
 
-      if (error.response?.status === 404) {
-        throw new NotFoundException('Usuario no encontrado');
-      }
-
-      throw new BadGatewayException('Upstream users service failed');
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+    };
   }
 
   async updateRole(id: string, role: UserRole) {
