@@ -21,6 +21,9 @@ export class UserEntity {
   @Column({ type: 'varchar', nullable: true, default: null })
   verificationToken!: string | null;
 
+  @Column({ type: 'datetime', nullable: true, default: null })
+  verificationTokenExpires!: Date | null;
+
   @Column({ type: 'varchar', nullable: true, default: null })
   resetPasswordToken!: string | null;
 

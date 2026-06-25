@@ -34,11 +34,16 @@ export class AuthService {
     // 1. Generamos el token único de verificación
     const verificationToken = randomUUID();
 
+    const verificationTokenExpires = new Date(
+      Date.now() + 1000 * 60 * 60 * 24,
+    ); // 24 horas de expiracion
+    
     const entity = this.usersRepo.create({
       email: email.trim().toLowerCase(),
       passwordHash,
       role,
       verificationToken,
+      verificationTokenExpires,
       isVerified: false, // Inicialmente no verificado
     });
 
@@ -126,17 +131,22 @@ export class AuthService {
       where: { verificationToken: token },
     });
 
-    if (!user) {
-      throw new BadRequestException('Invalid verification token');
+    if (!user || !user.verificationTokenExpires) {
+      throw new BadRequestException('Token de verificacion inválido o inexistente');
+    }
+
+    if (user.verificationTokenExpires.getTime() < Date.now()) {
+      throw new BadRequestException('Token de verificacion inválido o inexistente');
     }
 
     user.isVerified = true;
     user.verificationToken = null;
+    user.verificationTokenExpires = null;
 
     const savedUser = await this.usersRepo.save(user);
 
     return {
-      message: 'Email verified successfully',
+      message: 'Email vrificado correctamente.',
       user: {
         id: savedUser.id,
         email: savedUser.email,
