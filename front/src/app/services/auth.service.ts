@@ -28,9 +28,11 @@ export class AuthService {
   } // Reemplazo de AuthResponse por RegisterResponse para que coincida con la respuesta del backend
 
   login(dto: LoginDto): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.api}/login`, dto).pipe(
-      tap((res) => this.handleAuth(res)),
-    );
+    return this.http.post<AuthResponse>(`${this.api}/login`, dto);
+  }
+
+  setAuth(res: AuthResponse): void {
+    this.handleAuth(res);
   }
 
   forgotPassword(dto: ForgotPasswordDto): Observable<void> {

@@ -23,7 +23,21 @@ export class LoginPage {
     this.error = '';
     this.loading.set(true);
     try {
-      await firstValueFrom(this.auth.login({ email: this.email, password: this.password }));
+      const response = await firstValueFrom(
+        this.auth.login({ email: this.email, password: this.password }),
+      );
+
+      if (!response.user.isVerified) {
+        this.router.navigate(['/verify-pending'], {
+          queryParams: {
+            email: response.user.email,
+            userId: response.user.id,
+          },
+        });
+        return;
+      }
+
+      this.auth.setAuth(response);
       this.router.navigate(['/']);
     } catch (err: any) {
       this.error = err.error?.message || 'Error al iniciar sesión';
