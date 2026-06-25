@@ -29,6 +29,13 @@ export interface RegisterResponse {
   user: SafeUser;
 }
 
+export interface ResendVerificationDto {
+  userId: string;
+}
+
+export interface ResendVerificationResponse {
+  message: string;
+}
 
 export interface VerifyEmailDto {
   token: string;

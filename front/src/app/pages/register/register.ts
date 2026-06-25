@@ -31,7 +31,7 @@ export class RegisterPage {
     }
 
     try {
-      await firstValueFrom(
+      const response = await firstValueFrom(
         this.auth.register({
           email: this.email,
           password: this.password,
@@ -39,7 +39,7 @@ export class RegisterPage {
       );
 
       this.router.navigate(['/verify-pending'], {
-        queryParams: { email: this.email },
+        queryParams: { email: this.email, userId: response.user.id },
       });
     } catch (err: any) {
       this.error = err.error?.message || 'Error al registrarse';

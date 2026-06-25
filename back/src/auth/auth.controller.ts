@@ -23,6 +23,11 @@ export class AuthController {
   verifyEmail(@Body() body: { token: string }) {
     return this.authService.verifyEmail(body.token);
   }
+  
+  @Post('resend-verification')
+  resend(@Body() body: { userId: string }) {
+    return this.authService.resendVerification(body.userId);
+  }
 
   @Post('forgot-password')
   forgotPassword(@Body() body: { email: string }) {

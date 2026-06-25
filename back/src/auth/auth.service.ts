@@ -236,4 +236,52 @@ export class AuthService {
       message: 'Password reset successfully',
     };
   }
+
+
+  async resendVerification(userId: string) {
+    const user = await this.usersRepo.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    if (user.isVerified) {
+      throw new BadRequestException('El correo ya ha sido verificado anteriormente');
+    }
+
+    // Generamos un nuevo token único
+    const newVerificationToken = randomUUID();
+    user.verificationToken = newVerificationToken;
+    await this.usersRepo.save(user);
+
+    // Construimos el link apuntando al puerto 4200 del Front
+    const frontendUrl = this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
+    const verificationLink = `${frontendUrl}/verify-email?token=${newVerificationToken}`;
+    const fromEmail = this.cfg.get<string>('MAIL_FROM') ?? 'onboarding@resend.dev';
+
+    // Envío asíncrono con Resend (con salvaguarda por si estás en dev)
+    const apiKey = this.cfg.get<string>('RESEND_API_KEY');
+    if (apiKey && apiKey !== 're_mock_123') {
+      this.resend.emails.send({
+        from: fromEmail,
+        to: user.email,
+        subject: 'Verifica tu cuenta - Nuevo enlace',
+        html: `
+          <h1>Verifica tu correo electrónico</h1>
+          <p>Has solicitado un nuevo enlace de verificación. Haz clic en el botón de abajo:</p>
+          <p><a href="${verificationLink}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Verificar mi correo</a></p>
+          <p>O copia este enlace: ${verificationLink}</p>
+        `,
+      }).catch(err => console.error('Error reenviando email con Resend:', err));
+    } else {
+      console.log('--- [DEV MODE] Reenvío de Email ---');
+      console.log(`Para: ${user.email}`);
+      console.log(`Link: ${verificationLink}`);
+      console.log('-----------------------------------');
+    }
+
+    return {
+      message: 'Se ha enviado un nuevo correo de verificación.',
+    };
+  }
 }

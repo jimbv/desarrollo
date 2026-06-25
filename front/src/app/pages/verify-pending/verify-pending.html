@@ -1,8 +1,9 @@
 <div class="verify-pending-container">
   <h2>Revisa tu email</h2>
-  <p>Te enviamos un mail de verificación</p>
-  <br/>
-  <a href="/sasasasa" target="_blank" style="padding-top:10px;">
-    <p><button routerLink="/login" class="btn btn-primary">Reenviar email</button>
-  </a> 
-</div> 
+  <p>{{ message() }}</p>
+  <br />
+
+  <button (click)="onResendEmail()" class="btn btn-primary" [disabled]="loading()">
+    {{ loading() ? 'Reenviando...' : 'Reenviar email' }}
+  </button>
+</div>

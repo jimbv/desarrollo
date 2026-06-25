@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { AuthResponse, ForgotPasswordDto, LoginDto, RegisterDto, RegisterResponse, ResetPasswordDto, VerifyEmailDto, VerifyEmailResponse } from '../models/auth';
+import { AuthResponse, ForgotPasswordDto, LoginDto, RegisterDto, RegisterResponse, ResendVerificationDto, ResendVerificationResponse, ResetPasswordDto, VerifyEmailDto, VerifyEmailResponse } from '../models/auth';
 import { SafeUser } from '../models/user';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
@@ -43,6 +43,10 @@ export class AuthService {
 
   verifyEmail(dto: VerifyEmailDto): Observable<VerifyEmailResponse> {
     return this.http.post<VerifyEmailResponse>(`${this.api}/verify-email`, dto);
+  }
+
+  resendVerification(dto: ResendVerificationDto): Observable<ResendVerificationResponse> {
+    return this.http.post<ResendVerificationResponse>(`${this.api}/resend-verification`, dto);
   }
 
   me(): Observable<SafeUser> {
