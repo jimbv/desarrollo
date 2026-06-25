@@ -28,3 +28,13 @@ export interface RegisterResponse {
   message: string;
   user: SafeUser;
 }
+
+
+export interface VerifyEmailDto {
+  token: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+  user: SafeUser;
+}

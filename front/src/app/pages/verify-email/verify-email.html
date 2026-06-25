@@ -1,8 +1,17 @@
-<div class="verify-email-container">
-  <h2>Email verificado correctamente</h2>
-  
-  <br/>
-  <a href="/login" target="_blank" style="padding-top:10px;">
-    <p><button routerLink="/login" class="btn btn-primary">Iniciar sesión</button>
-  </a>  
-</div> 
+<section class="verify-email-page">
+  <div class="verify-email-card">
+    <h1>Verificación de email</h1>
+
+    <p>{{ message() }}</p>
+
+    @if (loading()) {
+      <p>Por favor esperá unos segundos...</p>
+    }
+
+    @if (success()) {
+      <a routerLink="/login">Ir a iniciar sesión</a>
+    } @else if (!loading()) {
+      <a routerLink="/register">Volver a registrarse</a>
+    }
+  </div>
+</section>
