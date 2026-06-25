@@ -5,13 +5,16 @@
     <p>{{ message() }}</p>
 
     @if (loading()) {
-      <p>Por favor esperá unos segundos...</p>
+    <p>Por favor esperá unos segundos...</p>
     }
 
     @if (success()) {
-      <a routerLink="/login">Ir a iniciar sesión</a>
+    <a routerLink="/login">Ir a iniciar sesión</a>
     } @else if (!loading()) {
-      <a routerLink="/register">Volver a registrarse</a>
+    <a routerLink="/login">
+      <button class="btn btn-primary" [disabled]="loading()">
+        Volver a iniciar sesión
+      </button></a>
     }
   </div>
 </section>
