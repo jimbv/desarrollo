@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ExternalUser } from '../user.types';
 import { UsersService } from '../services/users.service';
+import { UserRole } from '../user-role.enum';
 
 @Controller('users')
 export class UsersController {
@@ -24,5 +25,13 @@ export class UsersController {
       mensaje: "Usuario creado exitosamente",
       data: body,
     };
+  }
+
+  @Patch(':id/role')
+  updateRole(
+    @Param('id') id: string,
+    @Body('role') role: UserRole,
+  ) {
+    return this.usersService.updateRole(id, role);
   }
 }

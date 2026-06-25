@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -118,6 +118,112 @@ export class AuthService {
         createdAt: user.createdAt,
       },
       access_token: accessToken,
+    };
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.usersRepo.findOne({
+      where: { verificationToken: token },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid verification token');
+    }
+
+    user.isVerified = true;
+    user.verificationToken = null;
+
+    const savedUser = await this.usersRepo.save(user);
+
+    return {
+      message: 'Email verified successfully',
+      user: {
+        id: savedUser.id,
+        email: savedUser.email,
+        role: savedUser.role,
+        isVerified: savedUser.isVerified,
+        createdAt: savedUser.createdAt,
+      },
+    };
+  }
+
+  async forgotPassword(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await this.usersRepo.findOne({
+      where: { email: normalizedEmail },
+    });
+
+    // Respuesta generica para no revelar si el email existe o no
+    if (!user) {
+      return {
+        message: 'If the email exists, a reset link was sent',
+      };
+    }
+
+    const resetPasswordToken = randomUUID();
+    const resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 30); // 30 minutos
+
+    user.resetPasswordToken = resetPasswordToken;
+    user.resetPasswordExpires = resetPasswordExpires;
+
+    await this.usersRepo.save(user);
+
+    const frontendUrl =
+      this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+
+    const resetLink = `${frontendUrl}/reset-password?token=${resetPasswordToken}`;
+
+    const fromEmail =
+    this.cfg.get<string>('MAIL_FROM') ?? 'onboarding@resend.dev';
+
+    this.resend.emails
+      .send({
+        from: fromEmail,
+        to: user.email,
+        subject: 'Reset your password',
+        html: `
+          <h1>Reset your password</h1>
+          <p>You requested a password reset.</p>
+          <p>Click the link below to set a new password:</p>
+          <p><a href="${resetLink}" style="padding: 10px 20px;  background-color: #007bff; color: white; text-decoration: none;  border-radius: 5px;">Reset password</a></p>
+          <p>If the button does not work, copy and paste this link:</p>
+          <p>${resetLink}</p>
+          <p>This link expires in 30 minutes.</p>
+        `,
+      })
+      .catch((err) => {
+        console.error('Error enviando email de recuperacion:', err);
+      });
+
+    return {
+      message: 'If the email exists, a reset link was sent',
+    };
+  }
+
+  async resetPassword(token: string, password: string) {
+    const user = await this.usersRepo.findOne({
+      where: { resetPasswordToken: token },
+    });
+
+    if (!user || !user.resetPasswordExpires) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    if (user.resetPasswordExpires.getTime() < Date.now()) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const rounds = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
+    user.passwordHash = await bcrypt.hash(password, rounds);
+
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+
+    await this.usersRepo.save(user);
+
+    return {
+      message: 'Password reset successfully',
     };
   }
 }
