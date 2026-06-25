@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -13,14 +14,13 @@ import { AuthService } from '../../services/auth.service';
 export class LoginPage {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   email = '';
   password = '';
-  error = '';
   loading = signal(false);
 
   async submit(): Promise<void> {
-    this.error = '';
     this.loading.set(true);
     try {
       const response = await firstValueFrom(
@@ -40,7 +40,7 @@ export class LoginPage {
       this.auth.setAuth(response);
       this.router.navigate(['/']);
     } catch (err: any) {
-      this.error = err.error?.message || 'Error al iniciar sesión';
+      this.toast.error(err.error?.message || 'Error al iniciar sesión');
     } finally {
       this.loading.set(false);
     }

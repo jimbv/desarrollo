@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -12,22 +13,19 @@ import { AuthService } from '../../services/auth.service';
 })
 export class ForgotPasswordPage {
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   email = '';
-  error = '';
-  success = '';
   loading = signal(false);
 
   async submit(): Promise<void> {
-    this.error = '';
-    this.success = '';
     this.loading.set(true);
 
     try {
       await firstValueFrom(this.auth.forgotPassword({ email: this.email }));
-      this.success = 'Si el email existe, vas a recibir un enlace para restablecer tu contraseña.';
+      this.toast.success('Si el email existe, recibirás un link');
     } catch (err: any) {
-      this.error = err.error?.message || 'No pudimos enviar el enlace';
+      this.toast.error(err.error?.message || 'No pudimos enviar el enlace');
     } finally {
       this.loading.set(false);
     }

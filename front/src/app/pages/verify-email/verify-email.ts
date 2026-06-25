@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -18,6 +19,7 @@ export class VerifyEmailPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private auth: AuthService,
+    private toast: ToastService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -35,7 +37,7 @@ export class VerifyEmailPage implements OnInit {
 
       this.loading.set(false);
       this.success.set(true);
-      this.message.set('Email verificado correctamente. Ya podés iniciar sesión.');
+      this.toast.success('Email verificado correctamente. Ya podés iniciar sesión.');
 
       setTimeout(() => {
         this.router.navigate(['/login']);
@@ -43,7 +45,7 @@ export class VerifyEmailPage implements OnInit {
     } catch {
       this.loading.set(false);
       this.success.set(false);
-      this.message.set('No se pudo verificar el email. El token puede ser inválido o haber sido usado.');
+      this.toast.error('Token inválido o expirado');
     }
   }
 }
