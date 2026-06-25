@@ -23,3 +23,8 @@ export interface AuthResponse {
   user: SafeUser;
   access_token: string;
 }
+
+export interface RegisterResponse {
+  message: string;
+  user: SafeUser;
+}

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { AuthResponse, ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from '../models/auth';
+import { AuthResponse, ForgotPasswordDto, LoginDto, RegisterDto, RegisterResponse, ResetPasswordDto } from '../models/auth';
 import { SafeUser } from '../models/user';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
@@ -23,11 +23,9 @@ export class AuthService {
     }
   }
 
-  register(dto: RegisterDto): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.api}/register`, dto).pipe(
-      tap((res) => this.handleAuth(res)),
-    );
-  }
+  register(dto: RegisterDto): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.api}/register`, dto);
+  } // Reemplazo de AuthResponse por RegisterResponse para que coincida con la respuesta del backend
 
   login(dto: LoginDto): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.api}/login`, dto).pipe(
