@@ -173,7 +173,7 @@ export class AuthService {
     }
 
     const resetPasswordToken = randomUUID();
-    const resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 30); // 30 minutos
+    const resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
 
     user.resetPasswordToken = resetPasswordToken;
     user.resetPasswordExpires = resetPasswordExpires;
@@ -181,26 +181,26 @@ export class AuthService {
     await this.usersRepo.save(user);
 
     const frontendUrl =
-      this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+      this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
 
     const resetLink = `${frontendUrl}/reset-password?token=${resetPasswordToken}`;
 
     const fromEmail =
-    this.cfg.get<string>('MAIL_FROM') ?? 'onboarding@resend.dev';
+      this.cfg.get<string>('MAIL_FROM') ?? 'onboarding@resend.dev';
 
     this.resend.emails
       .send({
         from: fromEmail,
         to: user.email,
-        subject: 'Reset your password',
+        subject: 'Recuperar contraseña',
         html: `
-          <h1>Reset your password</h1>
-          <p>You requested a password reset.</p>
-          <p>Click the link below to set a new password:</p>
-          <p><a href="${resetLink}" style="padding: 10px 20px;  background-color: #007bff; color: white; text-decoration: none;  border-radius: 5px;">Reset password</a></p>
-          <p>If the button does not work, copy and paste this link:</p>
+          <h1>Recuperar contraseña</h1>
+          <p>Has solicitado restablecer tu contraseña.</p>
+          <p>Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
+          <p><a href="${resetLink}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Restablecer contraseña</a></p>
+          <p>Si el botón no funciona, copia y pega este enlace:</p>
           <p>${resetLink}</p>
-          <p>This link expires in 30 minutes.</p>
+          <p>Este enlace expira en 1 hora.</p>
         `,
       })
       .catch((err) => {
@@ -208,7 +208,7 @@ export class AuthService {
       });
 
     return {
-      message: 'If the email exists, a reset link was sent',
+      message: 'Si el email existe, recibirás un link',
     };
   }
 
@@ -218,11 +218,11 @@ export class AuthService {
     });
 
     if (!user || !user.resetPasswordExpires) {
-      throw new BadRequestException('Invalid or expired reset token');
+      throw new BadRequestException('Token inválido o expirado');
     }
 
     if (user.resetPasswordExpires.getTime() < Date.now()) {
-      throw new BadRequestException('Invalid or expired reset token');
+      throw new BadRequestException('Token inválido o expirado');
     }
 
     const rounds = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
@@ -234,7 +234,7 @@ export class AuthService {
     await this.usersRepo.save(user);
 
     return {
-      message: 'Password reset successfully',
+      message: 'Contraseña actualizada',
     };
   }
 
