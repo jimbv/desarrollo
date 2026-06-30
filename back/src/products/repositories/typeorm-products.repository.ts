@@ -19,7 +19,7 @@ export class TypeOrmProductsRepository implements ProductsRepository {
 
   async findAll(
     name?: string,
-    orderBy?: 'price' | 'name',
+    orderBy?: 'id' | 'price' | 'name' | 'stock',
     order: 'asc' | 'desc' = 'asc',
     page = 1,
     limit = 10,

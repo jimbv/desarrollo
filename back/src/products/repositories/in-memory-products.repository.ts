@@ -6,7 +6,7 @@ export class InMemoryProductsRepository {
   private nextId = 1;
 
   findAll(name?: string,
-    orderBy?: 'price' | 'name',
+    orderBy?: 'id' | 'price' | 'name' | 'stock',
     order?: 'asc' | 'desc',
     page = 1,
     limit = 10,): PaginatedResult<Product> {
@@ -20,11 +20,15 @@ export class InMemoryProductsRepository {
 
     if (orderBy) {
       result.sort((a, b) => {
-        if (orderBy === 'price') {
-          return order === 'desc'? b.price - a.price: a.price - b.price;
+        if (orderBy === 'name') {
+          return order === 'desc'
+            ? b.name.localeCompare(a.name)
+            : a.name.localeCompare(b.name);
         }
 
-        return order === 'desc'? b.name.localeCompare(a.name): a.name.localeCompare(b.name);
+        return order === 'desc'
+          ? b[orderBy] - a[orderBy]
+          : a[orderBy] - b[orderBy];
       });
     }
 

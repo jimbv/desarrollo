@@ -27,14 +27,34 @@ export class ProductsService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
+  private withCategory(product: Product): Product {
+    const category = this.categoriesService.findOne(product.categoryId);
+
+    return {
+      ...product,
+      category,
+    };
+  }
+
   async findAll(
     name?: string,
-    orderBy?: 'price' | 'name',
+    orderBy?: 'id' | 'price' | 'name' | 'stock',
     order?: 'asc' | 'desc',
     page?: number,
     limit?: number,
   ): Promise<PaginatedResult<Product>> {
-    return this.productsRepository.findAll(name, orderBy, order, page, limit);
+    const result = await this.productsRepository.findAll(
+      name,
+      orderBy,
+      order,
+      page,
+      limit,
+    );
+
+    return {
+      ...result,
+      items: result.items.map((product) => this.withCategory(product)),
+    };
   }
 
   async findOne(id: number): Promise<Product> {
@@ -44,7 +64,7 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
-    return product;
+    return this.withCategory(product);
   }
 
   async findByCategoryId(categoryId: number): Promise<Product[]> {
@@ -58,7 +78,8 @@ export class ProductsService {
       throw new BadRequestException('Category does not exist');
     }
 
-    return this.productsRepository.create(input);
+    const product = await this.productsRepository.create(input);
+    return this.withCategory(product);
   }
 
   async update(id: number, input: UpdateProductInput): Promise<Product> {
@@ -76,7 +97,7 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
-    return product;
+    return this.withCategory(product);
   }
 
   async reduceStock(id: number, quantity: number): Promise<Product> {
@@ -99,7 +120,7 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
-    return updatedProduct;
+    return this.withCategory(updatedProduct);
   }
 
   async remove(id: number): Promise<Product> {
@@ -109,6 +130,6 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
-    return product;
+    return this.withCategory(product);
   }
 }

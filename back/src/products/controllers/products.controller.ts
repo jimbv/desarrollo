@@ -28,8 +28,8 @@ export class ProductsController {
   @Get()
   findAll(
     @Query('name') name?: string,
-    @Query('orderBy') orderBy?: 'price' | 'name',
-@Query('sortBy') sortBy?: 'price' | 'name',
+    @Query('orderBy') orderBy?: 'id' | 'price' | 'name' | 'stock',
+    @Query('sortBy') sortBy?: 'id' | 'price' | 'name' | 'stock',
     @Query('order') order?: 'asc' | 'desc' | 'ASC' | 'DESC',
     @Query('page') page?: string,
     @Query('limit') limit?: string,

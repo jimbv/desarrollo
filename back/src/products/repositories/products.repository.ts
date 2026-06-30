@@ -10,7 +10,7 @@ export const PRODUCTS_REPOSITORY = 'PRODUCTS_REPOSITORY';
 export interface ProductsRepository {
   findAll(
     name?: string,
-    orderBy?: 'price' | 'name',
+    orderBy?: 'id' | 'price' | 'name' | 'stock',
     order?: 'asc' | 'desc',
     page?: number,
     limit?: number,
