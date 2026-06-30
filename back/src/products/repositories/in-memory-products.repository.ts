@@ -12,9 +12,10 @@ export class InMemoryProductsRepository {
     limit = 10,): PaginatedResult<Product> {
     let result = [...this.products];
 
-    if (name) {
-      result = result.filter((product) =>
-        product.name.toLowerCase().includes(name.toLowerCase()),
+    if (name && String(name).trim() !== '' && String(name) !== 'undefined' && String(name) !== 'null') {
+      const searchName = String(name).toLowerCase();
+      result = result.filter((product) => 
+        product && product.name && String(product.name).toLowerCase().includes(searchName)
       );
     }
 
