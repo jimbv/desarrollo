@@ -12,22 +12,19 @@ export class UserEntity {
   @Column({ select: false })
   passwordHash!: string;
 
-  @Column({ type: 'text', default: UserRole.USER })
+  @Column({ type: 'varchar', default: UserRole.USER })
   role!: UserRole;
 
   @Column({ type: 'boolean', default: false })
   isVerified!: boolean;
 
-  @Column({ type: 'varchar', nullable: true, default: null })
+  @Column({ nullable: true })
   verificationToken!: string | null;
 
-  @Column({ type: 'datetime', nullable: true, default: null })
-  verificationTokenExpires!: Date | null;
-
-  @Column({ type: 'varchar', nullable: true, default: null })
+  @Column({ nullable: true })
   resetPasswordToken!: string | null;
 
-  @Column({ type: 'datetime', nullable: true, default: null })
+  @Column({ nullable: true })
   resetPasswordExpires!: Date | null;
 
   @CreateDateColumn()
