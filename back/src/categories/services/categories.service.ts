@@ -37,6 +37,12 @@ export class CategoriesService {
   }
 
   create(input: CreateCategoryInput): Category {
+    const existing = this.categoriesRepository.findByName(input.name);
+
+    if (existing) {
+      throw new ConflictException('El nombre de categoría ya existe');
+    }
+
     return this.categoriesRepository.create(input);
   }
 

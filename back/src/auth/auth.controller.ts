@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -25,6 +25,7 @@ export class AuthController {
   }
   
   @Post('resend-verification')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   resend(@Req() req) {
     return this.authService.resendVerification(req.user.id);

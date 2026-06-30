@@ -13,6 +13,10 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
     return this.categories.find((category) => category.id === id);
   }
 
+  findByName(name: string): Category | undefined {
+    return this.categories.find((category) => category.name === name);
+  }
+
   create(input: CreateCategoryInput): Category {
     const category: Category = {
       id: this.nextId++,
