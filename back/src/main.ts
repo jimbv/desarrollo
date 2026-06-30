@@ -11,9 +11,8 @@ async function bootstrap() {
   }),
   );
 
-  // 👇 AÑADE O REVISA ESTA CONFIGURACIÓN
   app.enableCors({
-    origin: 'http://localhost:4200', // El puerto de tu Frontend (Angular / etc)
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
