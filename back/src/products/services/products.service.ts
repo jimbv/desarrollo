@@ -130,6 +130,6 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
-    return this.withCategory(product);
+    return product;
   }
 }

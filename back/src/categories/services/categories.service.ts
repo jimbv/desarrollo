@@ -104,14 +104,6 @@ export class CategoriesService {
       throw new NotFoundException('Category not found');
     }
 
-    const products = await this.productsService.findByCategoryId(id);
-
-    if (products.length > 0) {
-      throw new ConflictException(
-        'Cannot delete category with associated products',
-      );
-    }
-
     const deletedCategory = this.categoriesRepository.remove(id);
 
     if (!deletedCategory) {
