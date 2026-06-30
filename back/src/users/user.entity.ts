@@ -18,13 +18,13 @@ export class UserEntity {
   @Column({ type: 'boolean', default: false })
   isVerified!: boolean;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   verificationToken!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   resetPasswordToken!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   resetPasswordExpires!: Date | null;
 
   @CreateDateColumn()

@@ -77,14 +77,6 @@
               <div class="border rounded p-3 mt-2">
                 <h5 class="fw-bold mb-3">Cambiar contraseña</h5>
 
-                @if (passwordMessage()) {
-                  <div class="alert alert-success">{{ passwordMessage() }}</div>
-                }
-
-                @if (passwordError()) {
-                  <div class="alert alert-danger">{{ passwordError() }}</div>
-                }
-
                 <div class="mb-3">
                   <label class="form-label">Contraseña actual</label>
                   <input
@@ -120,14 +112,6 @@
             @if (showEmailForm()) {
               <div class="border rounded p-3 mt-2">
                 <h5 class="fw-bold mb-3">Cambiar email</h5>
-
-                @if (emailMessage()) {
-                  <div class="alert alert-success">{{ emailMessage() }}</div>
-                }
-
-                @if (emailError()) {
-                  <div class="alert alert-danger">{{ emailError() }}</div>
-                }
 
                 <div class="mb-3">
                   <label class="form-label">Nuevo email</label>
