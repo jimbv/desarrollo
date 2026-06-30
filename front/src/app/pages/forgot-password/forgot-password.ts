@@ -22,7 +22,7 @@ export class ForgotPasswordPage {
     this.loading.set(true);
 
     try {
-      await firstValueFrom(this.auth.forgotPassword({ email: this.email }));
+      await firstValueFrom(this.auth.forgotPassword(this.email));
       this.toast.success('Si el email existe, recibirás un link');
     } catch (err: any) {
       this.toast.error(err.error?.message || 'No pudimos enviar el enlace');

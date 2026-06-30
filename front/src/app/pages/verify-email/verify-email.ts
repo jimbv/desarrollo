@@ -33,19 +33,21 @@ export class VerifyEmailPage implements OnInit {
     }
 
     try {
-      await firstValueFrom(this.auth.verifyEmail({ token }));
+      await firstValueFrom(this.auth.verifyEmail(token));
 
       this.loading.set(false);
       this.success.set(true);
-      this.toast.success('Email verificado correctamente. Ya podés iniciar sesión.');
+      this.toast.success('Email verificado correctamente');
 
       setTimeout(() => {
         this.router.navigate(['/login']);
       }, 2500);
-    } catch {
+    } catch (err: any) {
       this.loading.set(false);
       this.success.set(false);
-      this.toast.error('Token inválido o expirado');
+      const errorMsg = err.error?.message || 'Token inválido o expirado';
+      this.message.set(errorMsg);
+      this.toast.error(errorMsg);
     }
   }
 }

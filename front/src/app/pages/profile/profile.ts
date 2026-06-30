@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-profile',
@@ -14,6 +15,7 @@ import { UsersService } from '../../services/users.service';
 export class ProfilePage {
   auth = inject(AuthService);
   private usersService = inject(UsersService);
+  private toast = inject(ToastService);
 
   showPasswordForm = signal(false);
   showEmailForm = signal(false);
@@ -24,16 +26,7 @@ export class ProfilePage {
   currentPasswordForEmail = '';
   newEmail = '';
 
-  passwordMessage = signal('');
-  passwordError = signal('');
-
-  emailMessage = signal('');
-  emailError = signal('');
-
   async changePassword(): Promise<void> {
-    this.passwordMessage.set('');
-    this.passwordError.set('');
-
     try {
       const res = await firstValueFrom(
         this.usersService.updateMyPassword({
@@ -42,36 +35,39 @@ export class ProfilePage {
         }),
       );
 
-      this.passwordMessage.set(res.message);
+      this.toast.success(res.message || 'Contraseña actualizada');
       this.currentPasswordForPassword = '';
       this.newPassword = '';
-    } catch {
-      this.passwordError.set(
-        'No se pudo cambiar la contraseña. Verificá la contraseña actual.',
+      this.showPasswordForm.set(false);
+    } catch (err: any) {
+      this.toast.error(
+        err.error?.message || 'No se pudo cambiar la contraseña. Verificá la contraseña actual.',
       );
     }
   }
 
   async changeEmail(): Promise<void> {
-    this.emailMessage.set('');
-    this.emailError.set('');
-
     try {
+      const dto = {
+        password: this.currentPasswordForEmail,
+        newEmail: this.newEmail,
+      } as any;
+
       const res = await firstValueFrom(
-        this.usersService.updateMyEmail({
-          currentPassword: this.currentPasswordForEmail,
-          newEmail: this.newEmail,
-        }),
+        this.usersService.updateMyEmail(dto),
       );
 
-      this.emailMessage.set(res.message);
+      this.toast.success(res.message || 'Email actualizado');
       this.currentPasswordForEmail = '';
       this.newEmail = '';
+      this.showEmailForm.set(false);
 
-      this.auth.user.set(res.user);
-    } catch {
-      this.emailError.set(
-        'No se pudo cambiar el email. Verificá la contraseña actual o si el email ya está en uso.',
+      if (res.user) {
+        this.auth.user.set(res.user);
+      }
+    } catch (err: any) {
+      this.toast.error(
+        err.error?.message || 'No se pudo cambiar el email. Verificá la contraseña actual o si el email ya está en uso.',
       );
     }
   }

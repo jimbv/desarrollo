@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
@@ -28,12 +22,7 @@ export class UsersService {
   }
 
   async findAll() {
-    const users = await this.usersRepo.find({
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-
+    const users = await this.usersRepo.find({ order: { createdAt: 'DESC' } });
     return users.map((user) => ({
       id: user.id,
       email: user.email,
@@ -44,14 +33,8 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.usersRepo.findOne({
-      where: { id },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
     return {
       id: user.id,
       email: user.email,
@@ -70,16 +53,18 @@ export class UsersService {
       throw new ForbiddenException('Cannot change your own role');
     }
 
-    const user = await this.usersRepo.findOne({
-      where: { id },
-    });
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+    // Validación extra: Impedir degradar al único administrador del sistema
+    if (user.role === UserRole.ADMIN && role !== UserRole.ADMIN) {
+      const adminCount = await this.usersRepo.count({ where: { role: UserRole.ADMIN } });
+      if (adminCount <= 1) {
+        throw new ForbiddenException('Cannot demote the only admin');
+      }
     }
 
     user.role = role;
-
     const savedUser = await this.usersRepo.save(user);
 
     return {
@@ -91,48 +76,29 @@ export class UsersService {
     };
   }
 
-  async updateMyPassword(
-    userId: string,
-    currentPassword: string,
-    newPassword: string,
-  ) {
+  async updateMyPassword(userId: string, currentPassword: string, newPassword: string) {
     const user = await this.usersRepo
       .createQueryBuilder('u')
       .addSelect('u.passwordHash')
       .where('u.id = :id', { id: userId })
       .getOne();
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    if (!user) throw new NotFoundException('User not found');
 
     const ok = await bcrypt.compare(currentPassword, user.passwordHash);
-
-    if (!ok) {
-      throw new BadRequestException('Current password is incorrect');
-    }
+    if (!ok) throw new BadRequestException('Current password is incorrect');
 
     const rounds = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
     user.passwordHash = await bcrypt.hash(newPassword, rounds);
-
     await this.usersRepo.save(user);
 
-    return {
-      message: 'Password updated successfully',
-    };
+    return { message: 'Password updated' };
   }
 
-  async updateMyEmail(
-    userId: string,
-    currentPassword: string,
-    newEmail: string,
-  ) {
+  async updateMyEmail(userId: string, currentPassword: string, newEmail: string) {
     const normalizedEmail = newEmail.trim().toLowerCase();
 
-    const existingUser = await this.usersRepo.findOne({
-      where: { email: normalizedEmail },
-    });
-
+    const existingUser = await this.usersRepo.findOne({ where: { email: normalizedEmail } });
     if (existingUser && existingUser.id !== userId) {
       throw new ConflictException('Email already in use');
     }
@@ -143,34 +109,22 @@ export class UsersService {
       .where('u.id = :id', { id: userId })
       .getOne();
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    if (!user) throw new NotFoundException('User not found');
 
     const ok = await bcrypt.compare(currentPassword, user.passwordHash);
-
-    if (!ok) {
-      throw new BadRequestException('Current password is incorrect');
-    }
+    if (!ok) throw new BadRequestException('Current password is incorrect');
 
     const verificationToken = randomUUID();
-    const verificationTokenExpires = new Date(
-      Date.now() + 1000 * 60 * 60 * 24,
-    );
 
     user.email = normalizedEmail;
     user.isVerified = false;
     user.verificationToken = verificationToken;
-    user.verificationTokenExpires = verificationTokenExpires;
 
     const savedUser = await this.usersRepo.save(user);
 
-    const frontendUrl =
-      this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
-
+    const frontendUrl = this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
     const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}`;
-    const fromEmail =
-      this.cfg.get<string>('MAIL_FROM') ?? 'onboarding@resend.dev';
+    const fromEmail = this.cfg.get<string>('MAIL_FROM') ?? 'onboarding@resend.dev';
 
     this.resend.emails
       .send({
@@ -181,22 +135,12 @@ export class UsersService {
           <h1>Verify your new email</h1>
           <p>Please verify your new email address by clicking the link below:</p>
           <p><a href="${verificationLink}">Verify email</a></p>
-          <p>${verificationLink}</p>
         `,
       })
       .catch((err) => {
         console.error('Error enviando email de verificacion:', err);
       });
 
-    return {
-      message: 'Email updated successfully. Please verify your new email.',
-      user: {
-        id: savedUser.id,
-        email: savedUser.email,
-        role: savedUser.role,
-        isVerified: savedUser.isVerified,
-        createdAt: savedUser.createdAt,
-      },
-    };
+    return { message: 'Email updated' };
   }
 }

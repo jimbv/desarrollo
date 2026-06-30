@@ -30,15 +30,10 @@ export class VerifyPendingPage implements OnInit {
   }
 
   async onResendEmail(): Promise<void> {
-    if (!this.userId) {
-      this.message.set('No se encontró el usuario para reenviar el correo. Vuelve a registrarte o inicia sesión.');
-      return;
-    }
-
     this.loading.set(true);
     try {
-      const response = await firstValueFrom(this.auth.resendVerification({ userId: this.userId }));
-      this.toast.success(response.message);
+      const response = await firstValueFrom(this.auth.resendVerification());
+      this.toast.success(response.message || 'Email reenviado');
     } catch (err: any) {
       this.toast.error(err.error?.message || 'Error al reenviar el email de verificación.');
     } finally {

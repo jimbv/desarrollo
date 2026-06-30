@@ -18,8 +18,8 @@ export interface UpdateMyPasswordDto {
 }
 
 export interface UpdateMyEmailDto {
-  currentPassword: string;
   newEmail: string;
+  password: string;
 }
 
 export interface MessageResponse {

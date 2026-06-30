@@ -25,7 +25,7 @@ export class AuthService {
 
   register(dto: RegisterDto): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${this.api}/register`, dto);
-  } // Reemplazo de AuthResponse por RegisterResponse para que coincida con la respuesta del backend
+  }
 
   login(dto: LoginDto): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.api}/login`, dto);
@@ -35,20 +35,20 @@ export class AuthService {
     this.handleAuth(res);
   }
 
-  forgotPassword(dto: ForgotPasswordDto): Observable<void> {
-    return this.http.post<void>(`${this.api}/forgot-password`, dto);
+  forgotPassword(email: string) {
+  return this.http.post<any>(`${this.api}/forgot-password`, { email });
   }
 
-  resetPassword(dto: ResetPasswordDto): Observable<void> {
-    return this.http.post<void>(`${this.api}/reset-password`, dto);
+  resetPassword(token: string, password: string) {
+  return this.http.post<any>(`${this.api}/reset-password`, { token, password });
   }
 
-  verifyEmail(dto: VerifyEmailDto): Observable<VerifyEmailResponse> {
-    return this.http.post<VerifyEmailResponse>(`${this.api}/verify-email`, dto);
+  verifyEmail(token: string) {
+  return this.http.post<any>(`${this.api}/verify-email`, { token });
   }
 
-  resendVerification(dto: ResendVerificationDto): Observable<ResendVerificationResponse> {
-    return this.http.post<ResendVerificationResponse>(`${this.api}/resend-verification`, dto);
+  resendVerification(): Observable<any> {
+  return this.http.post<any>(`${this.api}/resend-verification`, {});
   }
 
   me(): Observable<SafeUser> {

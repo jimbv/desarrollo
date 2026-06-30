@@ -45,7 +45,7 @@ export class ResetPasswordPage {
 
     this.loading.set(true);
     try {
-      await firstValueFrom(this.auth.resetPassword({ token: this.token, password: this.password }));
+      await firstValueFrom(this.auth.resetPassword(this.token, this.password));
       this.toast.success('Contraseña actualizada');
     } catch (err: any) {
       this.toast.error(err.error?.message || 'No pudimos actualizar la contraseña');
