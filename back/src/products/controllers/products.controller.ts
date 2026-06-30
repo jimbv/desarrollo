@@ -8,14 +8,20 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from '../services/products.service';
 import { Product } from '../product.types';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { PaginatedResult } from '../../common/types/paginated-result.type';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../users/user-role.enum';
 
 @Controller('products')
+@UseGuards(JwtAuthGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -23,15 +29,15 @@ export class ProductsController {
   findAll(
     @Query('name') name?: string,
     @Query('orderBy') orderBy?: 'price' | 'name',
-    @Query('sortBy') sortBy?: 'price' | 'name',
-    @Query('order') order?: 'asc' | 'desc',
+@Query('sortBy') sortBy?: 'price' | 'name',
+    @Query('order') order?: 'asc' | 'desc' | 'ASC' | 'DESC',
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ): Promise<PaginatedResult<Product>> {
     return this.productsService.findAll(
       name,
       sortBy ?? orderBy,
-      order,
+      order?.toLowerCase() as 'asc' | 'desc' | undefined,
       page ? Number(page) : undefined,
       limit ? Number(limit) : undefined,
     );
@@ -43,11 +49,15 @@ export class ProductsController {
   }
 
   @Post()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   create(@Body() body: CreateProductDto): Promise<Product> {
     return this.productsService.create(body);
   }
 
   @Put(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   update(
     @Param('id') id: string,
     @Body() body: UpdateProductDto,
@@ -56,6 +66,8 @@ export class ProductsController {
   }
 
   @Patch(':id/stock')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   reduceStock(
     @Param('id') id: string,
     @Body() body: { quantity: number },
@@ -64,6 +76,8 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string): Promise<Product> {
     return this.productsService.remove(Number(id));
   }

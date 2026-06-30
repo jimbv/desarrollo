@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -60,9 +61,13 @@ export class UsersService {
     };
   }
 
-  async updateRole(id: string, role: UserRole) {
+  async updateRole(id: string, role: UserRole, currentUserId?: string) {
     if (!Object.values(UserRole).includes(role)) {
       throw new BadRequestException('Invalid role');
+    }
+
+    if (currentUserId && id === currentUserId) {
+      throw new ForbiddenException('Cannot change your own role');
     }
 
     const user = await this.usersRepo.findOne({
